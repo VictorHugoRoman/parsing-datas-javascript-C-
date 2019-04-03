@@ -1,0 +1,63 @@
+//Manera 1, LLAMAR CONTROLADOR ENVIANDOLE UNA JsonString y el response tipo JsonString
+C# y javascript (NewtonSoft, system.web.mvc)
+
+//Javascript jquery
+contentType: 'application/json; charset=utf-8' (no usar, ya que intenta parsear el paramtro del controller al tipo CustomEntidad enviada)
+var json = JSON.stringify(entidad);
+$.ajax({
+   url: '@Url.Action("Guardar", "NameController")',
+   type: 'POST',
+   dataType: 'json',
+   data: "entidad=" + json,
+   success: function (data) {
+      var resultado = JSON.parse(data);
+      var mensajes = JSON.parse(resultado.mensajes);
+   }
+
+//C#
+[HttpPost]
+public ActionResult Guardar(string strEntidad){
+  //ActionResult Espera un JsonResult, tambien se utiliza para renderiza vistas
+  //JObject namesPace NewtonSoft  
+  JObject mensajes = new JObject();
+  
+  CustomEntidad _entidad = JsonConvert.DeserializeObject<CustomEntidad>(strEntidad);
+  //EjecutarGuardar la entidadParseada, retorna true  si guarda, sino false
+  if(GuardarEntidad(CustomEntidad _entidad))
+  {
+     mensajes = new JObject(
+      new JProperty("estatus", "correcto"),
+      new JProperty("mensajes", "Guardado Correctamente"));
+  }
+  else
+  {
+   mensajes = new JObject(
+      new JProperty("estatus", "error"),
+      new JProperty("mensajes", "Ocurrio un problema"));
+  }
+  //la funcion Json(), retorna un JsonResult que es el tipo de retorno que se espera
+  return Json(JsonConvert.SerializeObject(mensajes), JsonRequestBehavior.AllowGet);
+}
+
+//Funciones serializables
+  JsonConvert.DeserializeObject<CustomClass>(CustomEntidad);
+  JsonConvert.DeserializeObject<ListCustomClass>(ListaCustomEntidad);
+//Asignar propiedades a los objetos anonimos 
+  JObject objerrores = new JObject();
+  objerrores.Add("key", "valor");
+
+//Trabajar con Objetos anonimos object en C#
+object objeto = JsonConvert.DeserializeObject<object>(((System.Web.Mvc.JsonResult)ComprobarDirectorio()).Data.ToString());
+ private ActionResult ComprobarDirectorio() {
+  JObject result = new JObject();
+  //hacer validaciones
+  result = new JObject(new JProperty("estatus", "correcto"), new JProperty("mensaje", "directorio Correcto"));
+  //return Json(result.ToString());
+  //tambien
+  return Json(JsonConvert.SerializeObject(mensajes), JsonRequestBehavior.AllowGet);
+}
+//Obteniendo los valores del Object objeto
+string estado = ((JObject)directorio).GetValue("estatus").ToString();         
+string mensaje = ((JObject)directorio).GetValue("mensaje").ToString();
+
+
